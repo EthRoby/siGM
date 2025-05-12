@@ -43,7 +43,10 @@ not through words, but through code.
 
 ```env
 OPENAI_API_KEY=your-openai-api-key
-BEARER_TOKEN=your-twitter-bearer-token
+TWITTER_API_KEY=your-twitter-api-key
+TWITTER_API_SECRET=your-twitter-api-secret
+TWITTER_ACCESS_TOKEN=your-twitter-access-token
+TWITTER_ACCESS_SECRET=your-twitter-access-secret
 TARGET_USERNAME=your-twitter-handle (without @)
 
 ```

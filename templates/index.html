@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-6 col-lg-3">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-value">{{ stats.total_comments }}</div>
+                        <div class="stat-label">Total Comments</div>
+                    </div>
+                    <div class="stat-icon text-primary">
+                        <i class="fas fa-comment-dots"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-value">{{ stats.comments_today }}</div>
+                        <div class="stat-label">Comments Today</div>
+                    </div>
+                    <div class="stat-icon text-success">
+                        <i class="fas fa-calendar-day"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-value">{{ "%.1f"|format(stats.success_rate) }}%</div>
+                        <div class="stat-label">Success Rate</div>
+                    </div>
+                    <div class="stat-icon text-info">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-value">{{ stats.active_rules }}</div>
+                        <div class="stat-label">Active Rules</div>
+                    </div>
+                    <div class="stat-icon text-warning">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Recent Activity</h5>
+                <a href="{{ url_for('analytics') }}" class="btn btn-sm btn-outline-secondary">
+                    View All
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="chart-container" style="position: relative; height:240px;">
+                    <canvas id="activityChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('templates') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-plus-circle me-2"></i>New Template
+                    </a>
+                    <a href="{{ url_for('rules') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-plus-circle me-2"></i>New Rule
+                    </a>
+                    <button id="dashboard-run-now" class="btn btn-success">
+                        <i class="fas fa-play me-2"></i>Run Bot Now
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Active Rules Overview</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="rulesTable">
+                        <thead>
+                            <tr>
+                                <th>Rule Name</th>
+                                <th>Trigger Type</th>
+                                <th>Template</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="5" class="text-center py-4">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Dashboard activity chart
+        const activityCtx = document.getElementById('activityChart').getContext('2d');
+        
+        // Sample data - in a real implementation this would come from the backend
+        const activityChart = new Chart(activityCtx, {
+            type: 'line',
+            data: {
+                labels: ['7 days ago', '6 days ago', '5 days ago', '4 days ago', '3 days ago', '2 days ago', 'Yesterday', 'Today'],
+                datasets: [{
+                    label: 'Comments',
+                    data: [12, 19, 8, 15, 12, 8, 15, {{ stats.comments_today }}],
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 2,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Load active rules
+        loadActiveRules();
+        
+        // Dashboard run now button
+        document.getElementById('dashboard-run-now').addEventListener('click', function() {
+            document.getElementById('run-now-btn').click();
+        });
+    });
+    
+    async function loadActiveRules() {
+        try {
+            const response = await fetch('/api/rules');
+            if (!response.ok) {
+                throw new Error('Failed to fetch rules');
+            }
+            
+            const rules = await response.json();
+            
+            // Get templates for matching rule templates
+            const templatesResponse = await fetch('/api/templates');
+            if (!templatesResponse.ok) {
+                throw new Error('Failed to fetch templates');
+            }
+            
+            const templates = await templatesResponse.json();
+            const templatesMap = templates.reduce((map, template) => {
+                map[template.id] = template;
+                return map;
+            }, {});
+            
+            // Filter active rules
+            const activeRules = rules.filter(rule => rule.enabled);
+            
+            const tableBody = document.querySelector('#rulesTable tbody');
+            
+            if (activeRules.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center py-4">
+                            No active rules found. <a href="/rules">Create a rule</a> to get started.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tableBody.innerHTML = activeRules.map(rule => {
+                const template = templatesMap[rule.template_id] || { name: 'Unknown Template' };
+                
+                return `
+                    <tr>
+                        <td>${rule.name}</td>
+                        <td>
+                            <span class="badge ${getTriggerTypeBadgeClass(rule.trigger_type)}">
+                                ${formatTriggerType(rule.trigger_type)}
+                            </span>
+                        </td>
+                        <td>${template.name}</td>
+                        <td>
+                            <span class="badge bg-success">Active</span>
+                        </td>
+                        <td>
+                            <a href="/rules" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            
+        } catch (error) {
+            console.error('Error loading rules:', error);
+            document.querySelector('#rulesTable tbody').innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center py-4 text-danger">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        Error loading rules: ${error.message}
+                    </td>
+                </tr>
+            `;
+        }
+    }
+    
+    function getTriggerTypeBadgeClass(triggerType) {
+        switch (triggerType) {
+            case 'new_post':
+                return 'bg-primary';
+            case 'keyword':
+                return 'bg-info';
+            case 'scheduled':
+                return 'bg-warning';
+            default:
+                return 'bg-secondary';
+        }
+    }
+    
+    function formatTriggerType(triggerType) {
+        switch (triggerType) {
+            case 'new_post':
+                return 'New Post';
+            case 'keyword':
+                return 'Keyword';
+            case 'scheduled':
+                return 'Scheduled';
+            default:
+                return triggerType.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+        }
+    }
+</script>
+{% endblock %}

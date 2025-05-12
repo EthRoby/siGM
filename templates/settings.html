@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block page_title %}Settings{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Bot Settings</h5>
+            </div>
+            <div class="card-body">
+                <form id="settings-form">
+                    <div class="form-check form-switch custom-toggle mb-4">
+                        <input class="form-check-input" type="checkbox" id="bot-enabled" checked>
+                        <label class="form-check-label" for="bot-enabled">Bot Enabled</label>
+                        <small class="form-text text-muted d-block">When disabled, the bot will not post any comments automatically.</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="max-comments" class="form-label">Maximum Comments Per Hour</label>
+                        <input type="number" class="form-control" id="max-comments" min="1" max="100" value="10">
+                        <small class="form-text text-muted">Limit the number of comments the bot can post in an hour.</small>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="mb-3">
+                        <label for="notification-email" class="form-label">Notification Email</label>
+                        <input type="email" class="form-control" id="notification-email" placeholder="your@email.com">
+                        <small class="form-text text-muted">Email address for error notifications.</small>
+                    </div>
+                    
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" id="error-notification" checked>
+                        <label class="form-check-label" for="error-notification">Receive Error Notifications</label>
+                        <small class="form-text text-muted d-block">Get notified when the bot encounters errors.</small>
+                    </div>
+                    
+                    <button type="button" class="btn btn-primary" id="save-settings-btn">
+                        <i class="fas fa-save me-2"></i>Save Settings
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Schedule</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">The bot runs automatically every 5 minutes to check for new opportunities to post comments.</p>
+                
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    You can also manually trigger the bot to run using the "Run Now" button in the sidebar.
+                </div>
+                
+                <div class="mt-4">
+                    <h6>Last Run</h6>
+                    <p id="last-run-time">Loading...</p>
+                    
+                    <h6>Next Scheduled Run</h6>
+                    <p id="next-run-time">Loading...</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">About</h5>
+            </div>
+            <div class="card-body">
+                <h5>Omyo Auto Comment Bot</h5>
+                <p>A tool for automatically posting comments based on predefined triggers and templates.</p>
+                
+                <div class="d-flex justify-content-between mt-4">
+                    <span>Version: 1.0.0</span>
+                    <span>© 2023 Omyo</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/settings.js') }}"></script>
+{% endblock %}

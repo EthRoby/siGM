@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block page_title %}Comment Rules{% endblock %}
+
+{% block page_actions %}
+<button class="btn btn-primary" id="new-rule-btn">
+    <i class="fas fa-plus me-2"></i>New Rule
+</button>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Manage Comment Rules</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="rulesTable">
+                        <thead>
+                            <tr>
+                                <th>Rule Name</th>
+                                <th>Trigger Type</th>
+                                <th>Template</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="5" class="text-center py-4">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Rule Form Modal -->
+<div class="modal fade" id="ruleModal" tabindex="-1" aria-labelledby="ruleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ruleModalLabel">New Rule</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="ruleForm">
+                    <input type="hidden" id="rule-id" value="">
+                    
+                    <div class="mb-3">
+                        <label for="rule-name" class="form-label">Rule Name</label>
+                        <input type="text" class="form-control" id="rule-name" placeholder="Enter a descriptive name" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="template-id" class="form-label">Template</label>
+                        <select class="form-select" id="template-id" required>
+                            <option value="">Select a template</option>
+                        </select>
+                        <small class="form-text text-muted">
+                            <a href="/templates" target="_blank">Create a new template</a> if you don't see what you need.
+                        </small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="trigger-type" class="form-label">Trigger Type</label>
+                        <select class="form-select" id="trigger-type" required>
+                            <option value="">Select a trigger type</option>
+                            <option value="new_post">New Post</option>
+                            <option value="keyword">Keyword</option>
+                            <option value="scheduled">Scheduled</option>
+                        </select>
+                    </div>
+                    
+                    <div id="keywords-container" class="mb-3 d-none">
+                        <label for="trigger-keywords" class="form-label">Trigger Keywords</label>
+                        <input type="text" class="form-control" id="trigger-keywords" placeholder="Enter keywords separated by commas">
+                        <small class="form-text text-muted">The bot will look for these keywords in content before commenting.</small>
+                    </div>
+                    
+                    <div id="template-variables-container" class="mb-3 d-none">
+                        <label class="form-label">Template Variables</label>
+                        <div id="variable-fields"></div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="cooldown-minutes" class="form-label">Cooldown Period (minutes)</label>
+                        <input type="number" class="form-control" id="cooldown-minutes" value="60" min="1" required>
+                        <small class="form-text text-muted">Minimum time between comments from this rule.</small>
+                    </div>
+                    
+                    <div class="form-check form-switch custom-toggle mb-3">
+                        <input class="form-check-input" type="checkbox" id="rule-enabled" checked>
+                        <label class="form-check-label" for="rule-enabled">Rule Enabled</label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="save-rule-btn">Save Rule</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this rule? This action cannot be undone.</p>
+                <p id="delete-rule-name" class="fw-bold text-danger"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirm-delete-btn">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/rules.js') }}"></script>
+{% endblock %}

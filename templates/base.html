@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Omyo Auto Comment Bot</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 d-md-block bg-body-tertiary sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <div class="my-4 text-center">
+                        <h4><i class="fas fa-robot me-2"></i>Omyo Bot</h4>
+                    </div>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link {{ 'active' if request.path == '/' else '' }}" href="{{ url_for('index') }}">
+                                <i class="fas fa-tachometer-alt me-2"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ 'active' if request.path == '/templates' else '' }}" href="{{ url_for('templates') }}">
+                                <i class="fas fa-file-alt me-2"></i>
+                                Templates
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ 'active' if request.path == '/rules' else '' }}" href="{{ url_for('rules') }}">
+                                <i class="fas fa-cogs me-2"></i>
+                                Rules
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ 'active' if request.path == '/analytics' else '' }}" href="{{ url_for('analytics') }}">
+                                <i class="fas fa-chart-bar me-2"></i>
+                                Analytics
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ 'active' if request.path == '/settings' else '' }}" href="{{ url_for('settings') }}">
+                                <i class="fas fa-sliders-h me-2"></i>
+                                Settings
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <hr>
+                    <div class="px-3 mb-3">
+                        <button id="run-now-btn" class="btn btn-success w-100">
+                            <i class="fas fa-play me-2"></i>Run Now
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main content area -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">{% block page_title %}Dashboard{% endblock %}</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        {% block page_actions %}{% endblock %}
+                    </div>
+                </div>
+
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+
+    <!-- Common JavaScript -->
+    <script>
+        document.getElementById('run-now-btn').addEventListener('click', async function() {
+            try {
+                this.disabled = true;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Running...';
+                
+                const response = await fetch('/api/run-now', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('success', 'Bot tasks executed successfully');
+                } else {
+                    showAlert('danger', result.message || 'Failed to execute bot tasks');
+                }
+            } catch (error) {
+                showAlert('danger', 'Error: ' + error.message);
+                console.error(error);
+            } finally {
+                this.disabled = false;
+                this.innerHTML = '<i class="fas fa-play me-2"></i>Run Now';
+            }
+        });
+
+        function showAlert(type, message) {
+            const alertContainer = document.createElement('div');
+            alertContainer.className = `alert alert-${type} alert-dismissible fade show`;
+            alertContainer.role = 'alert';
+            alertContainer.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            
+            // Insert at the top of the main content
+            const mainContent = document.querySelector('main');
+            mainContent.insertBefore(alertContainer, mainContent.firstChild);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                alertContainer.classList.remove('show');
+                setTimeout(() => alertContainer.remove(), 150);
+            }, 5000);
+        }
+    </script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Page-specific JavaScript -->
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -5,11 +5,18 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 
 def generate_comment(post_text):
     prompt = f"""
-You are a helpful and encouraging assistant. Read the post below and write a kind and thoughtful comment in reply.
+You are a supportive and encouraging assistant for the SIGN Protocol community.
+Your job is to read the post below and respond with a kind, insightful, and uplifting comment
+that encourages the poster to keep growing, one tweet at a time.
 
-Post: "{post_text}"
+Language: Auto-detect.
+Keep the comment under 100 characters.
+Add 🧡 or 🍊 at the end — but only one.
 
-Comment (keep it short, friendly, and insightful):
+Post:
+"{post_text}"
+
+Reply (short, warm, motivating):
 """
 
     try:
